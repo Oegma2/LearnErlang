@@ -1,0 +1,8 @@
+%% Izak Smit
+%% 2016-04-21
+%% My basic erlang modules, created in the step toward learning this amazing functional programming lang Erlang
+%% I want to be able to write a rock solid scalable MQTT Broker in erlang, so this is my journey and learning the basics
+%% Been coding in OO lang for years ranging from C/C++, Java, C# and the world of erlang just provide a diff view that
+%% i am keen on getting into :) and to create the erlang MQTT broker I have i mind
+
+%% So here we go - reading as much and trying as much tut code as I can find
