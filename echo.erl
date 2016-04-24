@@ -4,6 +4,19 @@
 start() ->
    register(echo, spawn(echo, myworld, [])).
 
+blowUpAfter(X) ->
+   timer:sleep(X),
+   exit("((( BOOM )))").
+
+testBoom() ->
+   link(spawn(echo,blowUpAfter, [3000])). 
+
+testMonitorBoom() ->
+   erlang:monitor(process, spawn(fun() -> timer:sleep(3000) end)).
+
+start(FoodList) ->
+   spawn(?MODULE, fridge, [FoodList]).
+
 fridge(FoodList) ->
    receive
       {From, {store, Food}} ->
@@ -22,6 +35,12 @@ fridge(FoodList) ->
          io:format("Ok exiting\n")
     end.
 
+store(Pid, Food) ->
+    Pid ! {self(), {store, Food}}.
+
+take(Pid, Food) ->
+    Pid ! {self(), {take, Food}}.
+   
 createGameTable() ->
    ets:new(myTable, []).
    
