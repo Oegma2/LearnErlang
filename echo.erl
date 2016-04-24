@@ -1,6 +1,34 @@
 -module(echo).
 -compile(export_all).
 
+newEvent({From, Lookup, Desc, Time}) ->
+   From ! {eventAdd_OK, {Lookup, Desc, Time}},
+   receive
+      {From, Lookup, cancel} ->
+         From ! {eventCanceled, Lookup}
+       after Time ->
+         From ! {eventTimeout, {Lookup, Desc}}
+    end;
+newEvent(_) ->
+   {ok, emptyEvent}.
+
+eventServer() ->
+   receive
+      {newEvent, Lookup, Desc, Time} ->
+         spawn(echo, newEvent, [{self(), Lookup, Desc, Time}]),
+         eventServer();
+      {eventAdd_OK, {Lookup, Desc, Time}} ->
+         io:format("Event added ~w ~w ~w ~n", [Lookup, Desc, Time]),
+         eventServer();
+      {eventTimeout, {Lookup, Desc}} ->
+         io:format("Event timed out ~w ~w ~n", [Lookup, Desc]),
+         eventServer();
+      WhatYaSay ->
+         io:format("Sorry dont know this message ~w~n", [WhatYaSay]),
+         eventServer()
+    end. 
+   
+
 start() ->
    register(echo, spawn(echo, myworld, [])).
 
@@ -70,6 +98,10 @@ processFile(FH) ->
 loadTest() ->
    G = fun(X) -> io:format("~p~n", [X]) end,
    [spawn(fun() -> G(X) end) || X <- lists:seq(1,300000)].
+
+loadTest2(S, Timeout, TestCount) ->
+   G = fun(X) -> S ! {newEvent, X, "funky chick", Timeout} end,
+   [spawn(fun() -> G(X) end) || X <- lists:seq(1,TestCount)].   
 
 myworld() ->
    receive
